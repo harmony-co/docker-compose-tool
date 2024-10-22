@@ -67,7 +67,7 @@ fn debug(comptime fmt: []const u8, args: anytype) void {
     }
 }
 
-fn exec(command: [][]const u8) std.process.Child.RunError!std.process.Child.RunResult {
+fn exec(command: []const []const u8) std.process.Child.RunError!std.process.Child.RunResult {
     return std.process.Child.run(.{
         .allocator = std.heap.page_allocator,
         .argv = command,
@@ -88,6 +88,10 @@ pub fn main() !void {
 
     const out = try exec(args[1..]);
     ok("Child process exited with out: {s}", .{out.stdout});
+
+    const args2 = .{ "echo", "Hello, World!" };
+    const out2 = try exec(&args2);
+    ok("Child process exited with out: {s}", .{out2.stdout});
 
     ok("This is a success message. {s}", .{"Hello, World!"});
     info("This is a test message.", .{});
