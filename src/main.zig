@@ -20,8 +20,10 @@ const flags = _program_flags{ .debug_mode = true };
 
 fn logMessage(comptime level: []const u8, comptime color: []const u8, comptime fmt: []const u8, args: anytype) void {
     var buffer: [256]u8 = undefined;
-    const message = std.fmt.bufPrint(&buffer, fmt, args) catch {
-        std.debug.print("Error formatting message\n", .{});
+    const message = std.fmt.bufPrint(&buffer, fmt, args) catch |e| {
+        switch (e) {
+            std.fmt.BufPrintError.NoSpaceLeft => err("Buffer too small", .{}, true, 1),
+        }
         return;
     };
     std.debug.print("{s}[{s}] {s}{s}\n", .{ color, level, ANSI.Reset, message });
@@ -56,14 +58,29 @@ fn debug(comptime fmt: []const u8, args: anytype) void {
     }
 }
 
+fn exec(command: [][]const u8) std.process.Child.RunError!std.process.Child.RunResult {
+    return std.process.Child.run(.{
+        .allocator = std.heap.page_allocator,
+        .argv = command,
+    }) catch |e| {
+        err("Failed to execute command: {!}", .{e}, true, 1);
+        return e;
+    };
+}
+
 pub fn main() !void {
     const args = try std.process.argsAlloc(std.heap.page_allocator);
     defer std.process.argsFree(std.heap.page_allocator, args);
+
+    ok("Args: {d}", .{args.len});
+
+    const out = try exec(args[1..]);
+    ok("Child process exited with out: {s}", .{out.stdout});
 
     ok("This is a success message. {s}", .{"Hello, World!"});
     info("This is a test message.", .{});
     warn("This is a warning message.", .{});
     debug("This is a debug message.", .{});
     err("This is an error message without fatal flag", .{}, false, null);
-    err("This is an error message with fatal flag", .{}, true, 130);
+    err("This is an error message with fatal flag (130)", .{}, true, 130);
 }
