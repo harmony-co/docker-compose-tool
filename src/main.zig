@@ -1,5 +1,7 @@
 const std = @import("std");
 
+var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+
 const ANSI = enum {
     const Green = "\x1b[1;32m";
     const Cyan = "\x1b[1;36m";
@@ -17,6 +19,13 @@ const _program_flags = struct {
 };
 
 const flags = _program_flags{ .debug_mode = true };
+
+fn getCwd() []u8 {
+    return std.fs.cwd().realpathAlloc(arena.allocator(), ".") catch |e| {
+        err("Failed to get current working directory: {!}", .{e}, true, 1);
+        unreachable;
+    };
+}
 
 fn logMessage(comptime level: []const u8, comptime color: []const u8, comptime fmt: []const u8, args: anytype) void {
     var buffer: [256]u8 = undefined;
@@ -63,14 +72,17 @@ fn exec(command: [][]const u8) std.process.Child.RunError!std.process.Child.RunR
         .allocator = std.heap.page_allocator,
         .argv = command,
     }) catch |e| {
-        err("Failed to execute command: {!}", .{e}, true, 1);
+        err("Failed to execute command: {!}", .{e}, false, null);
         return e;
     };
 }
 
 pub fn main() !void {
+    defer arena.deinit();
     const args = try std.process.argsAlloc(std.heap.page_allocator);
     defer std.process.argsFree(std.heap.page_allocator, args);
+
+    ok("Current working directory: {s}", .{getCwd()});
 
     ok("Args: {d}", .{args.len});
 
