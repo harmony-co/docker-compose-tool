@@ -9,6 +9,37 @@ const _program_flags = struct {
 
 const flags = _program_flags{ .debug_mode = true };
 
+fn ask(comptime question: []const u8, abort_on_refuse: bool) bool {
+    if (question.len == 0) {
+        log.err("No question provided", .{}, true, 1);
+    }
+
+    const reader_interface = std.io.getStdIn().reader();
+    var answer_buffer: [4096]u8 = undefined;
+
+    std.debug.print("{s}{s}{s}", .{ log.ANSI.Yellow, question ++ "\n", log.ANSI.Reset });
+    std.debug.print("Continue? [y/N] ", .{});
+    const answer = reader_interface.readUntilDelimiterOrEof(&answer_buffer, '\n') catch |e| {
+        log.err("{!}", .{e}, true, 1);
+        return false;
+    };
+
+    if (answer) |response| {
+        if (std.mem.eql(u8, response, "y")) {
+            log.ok("Continuing...", .{});
+        } else {
+            if (abort_on_refuse) {
+                log.err("Aborting...", .{}, true, 1);
+            } else {
+                log.warn("Continuing...", .{});
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 fn getCwd() []u8 {
     return std.fs.cwd().realpathAlloc(arena.allocator(), ".") catch |e| {
         log.err("Failed to get current working directory: {!}", .{e}, true, 1);
@@ -34,6 +65,8 @@ pub fn main() !void {
     log.ok("Current working directory: {s}", .{getCwd()});
 
     log.ok("Args: {d}", .{args.len});
+
+    _ = ask("Do you want to continue?", true);
 
     const out = try exec(args[1..]);
     log.ok("Child process exited with out: {s}", .{out.stdout});
