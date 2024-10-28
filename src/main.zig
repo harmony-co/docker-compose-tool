@@ -7,7 +7,7 @@ pub const std_options = .{
 
 fn ask(comptime question: []const u8, abort_on_refuse: bool) bool {
     if (question.len == 0) {
-        log.fatal("No question provided", .{}, null);
+        @compileError("You need to provide a question to ask");
     }
 
     const std_out = std.io.getStdOut();
