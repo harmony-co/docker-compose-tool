@@ -1,17 +1,5 @@
 const std = @import("std");
-
-pub const ANSI = enum {
-    pub const BoldGreen = "\x1b[1;32m";
-    pub const BoldCyan = "\x1b[1;36m";
-    pub const BoldYellow = "\x1b[1;33m";
-    pub const BoldRed = "\x1b[1;31m";
-    pub const BoldPurple = "\x1b[1;35m";
-    pub const BoldColorReset = "\x1b[22;39m";
-    pub const BoldUnderline = "\x1b[1;4m";
-    pub const ResetBoldUnderline = "\x1b[22;24m";
-    pub const Italic = "\x1b[3m";
-    pub const ItalicReset = "\x1b[23m";
-};
+const colorize = @import("color.zig").colorize;
 
 pub const ok = std.log.scoped(.ok).info;
 pub const info = std.log.info;
@@ -34,16 +22,16 @@ pub fn logMessage(
     comptime format: []const u8,
     args: anytype,
 ) void {
-    const level_string = switch (level) {
-        .debug => ANSI.BoldPurple ++ "[DEBUG]" ++ ANSI.BoldColorReset,
-        .err => ANSI.BoldRed ++ "[ERROR]" ++ ANSI.BoldColorReset,
-        .warn => ANSI.BoldYellow ++ "[WARN]" ++ ANSI.BoldColorReset,
-        .info => ANSI.BoldCyan ++ "[INFO]" ++ ANSI.BoldColorReset,
+    const level_string = comptime switch (level) {
+        .debug => colorize("[DEBUG]", .Magenta, &.{.Bold}),
+        .err => colorize("[ERROR]", .Red, &.{.Bold}),
+        .warn => colorize("[WARN]", .Yellow, &.{.Bold}),
+        .info => colorize("[INFO]", .Cyan, &.{.Bold}),
     };
 
-    const prefix = switch (scope) {
-        .ok => ANSI.BoldGreen ++ "[OK]" ++ ANSI.BoldColorReset,
-        .fatal => ANSI.BoldRed ++ "[FATAL]" ++ ANSI.BoldColorReset,
+    const prefix = comptime switch (scope) {
+        .ok => colorize("[OK]", .Green, &.{.Bold}),
+        .fatal => colorize("[FATAL]", .Red, &.{.Bold}),
         else => level_string,
     };
 

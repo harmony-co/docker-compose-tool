@@ -1,5 +1,6 @@
 const std = @import("std");
 const log = @import("util/logging.zig");
+const colorize = @import("util/color.zig").colorize;
 
 pub const std_options = .{
     .logFn = log.logMessage,
@@ -22,7 +23,7 @@ fn ask(comptime question: []const u8, abort_on_refuse: bool) bool {
 
     const writer = std_out.writer();
 
-    writer.print("{s}{s}{s}", .{ log.ANSI.BoldYellow, question ++ "\n", log.ANSI.BoldColorReset }) catch |e| {
+    writer.print("{s}", .{colorize(question ++ "\n", .Yellow, &.{.Bold})}) catch |e| {
         log.fatal("{!}", .{e}, null);
         return false;
     };
@@ -91,9 +92,7 @@ pub fn main() !void {
     log.ok("Child process exited with out: {s}", .{out2.stdout});
 
     log.debug("This is a debug message.", .{});
-    log.debug("Debug messages should only be displayed when running in {s}'debug mode'{s}", .{
-        log.ANSI.BoldUnderline, log.ANSI.ResetBoldUnderline,
-    });
+    log.debug("Debug messages should only be displayed when running in {s}", .{comptime colorize("'debug mode'", .None, &.{ .Bold, .Underline })});
 
     log.ok("This is a success message. {s}", .{"Hello, World!"});
     log.info("This is a test message.", .{});
