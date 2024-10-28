@@ -49,7 +49,7 @@ pub fn colorize(
         close = close ++ mod.close ++ @as([]const u8, &.{';'});
     }
 
-    if (color != .None) {
+    if (comptime color != .None) {
         open = open ++ std.fmt.comptimePrint("{d}", .{@intFromEnum(color)}) ++ @as([]const u8, &.{'m'});
         close = close ++ "39m";
     } else {
