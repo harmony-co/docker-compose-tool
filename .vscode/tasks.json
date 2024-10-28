@@ -4,9 +4,18 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build:debug",
             "type": "shell",
             "command": "zig build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build:safe",
+            "type": "shell",
+            "command": "zig build -Doptimize=ReleaseSafe",
             "group": {
                 "kind": "build",
                 "isDefault": true
