@@ -54,7 +54,7 @@ pub fn colorize(
         close = close ++ "39m";
     } else {
         open = open[0 .. open.len - 1] ++ @as([]const u8, &.{'m'});
-        close = close[0 .. open.len - 1] ++ @as([]const u8, &.{'m'});
+        close = close[0 .. close.len - 1] ++ @as([]const u8, &.{'m'});
     }
 
     return "\x1B[" ++ open ++ text ++ "\x1B[" ++ close;
