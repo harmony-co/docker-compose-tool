@@ -1,6 +1,6 @@
 const std = @import("std");
 const log = @import("util/logging.zig");
-const colorize = @import("util/color.zig").colorize;
+const SGR = @import("tasai").SGR;
 
 pub const std_options = .{
     .logFn = log.logMessage,
@@ -23,7 +23,7 @@ fn ask(comptime question: []const u8, abort_on_refuse: bool) bool {
 
     const writer = std_out.writer();
 
-    writer.print("{s}", .{colorize(question ++ "\n", .Yellow, &.{.Bold})}) catch |e| {
+    writer.print(SGR.parseString("<f:yellow><b>{s}\n<r><r>"), .{question}) catch |e| {
         log.fatal("{!}", .{e}, null);
         return false;
     };
@@ -92,7 +92,7 @@ pub fn main() !void {
     log.ok("Child process exited with out: {s}", .{out2.stdout});
 
     log.debug("This is a debug message.", .{});
-    log.debug("Debug messages should only be displayed when running in {s}", .{comptime colorize("'debug mode'", .None, &.{ .Bold, .Underline })});
+    log.debug(SGR.parseString("Debug messages should only be displayed when running in <u><b>{s}<r><r>"), .{"'debug mode'"});
 
     log.ok("This is a success message. {s}", .{"Hello, World!"});
     log.info("This is a test message.", .{});

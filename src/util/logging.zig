@@ -1,5 +1,5 @@
 const std = @import("std");
-const colorize = @import("color.zig").colorize;
+const SGR = @import("tasai").SGR;
 
 pub const ok = std.log.scoped(.ok).info;
 pub const info = std.log.info;
@@ -23,15 +23,15 @@ pub fn logMessage(
     args: anytype,
 ) void {
     const level_string = comptime switch (level) {
-        .debug => colorize("[DEBUG]", .Magenta, &.{.Bold}),
-        .err => colorize("[ERROR]", .Red, &.{.Bold}),
-        .warn => colorize("[WARN]", .Yellow, &.{.Bold}),
-        .info => colorize("[INFO]", .Cyan, &.{.Bold}),
+        .debug => SGR.parseString("<f:magenta><b>[DEBUG]<r><r>"),
+        .err => SGR.parseString("<f:red><b>[ERROR]<r><r>"),
+        .warn => SGR.parseString("<f:yellow><b>[WARN]<r><r>"),
+        .info => SGR.parseString("<f:cyan><b>[INFO]<r><r>"),
     };
 
     const prefix = comptime switch (scope) {
-        .ok => colorize("[OK]", .Green, &.{.Bold}),
-        .fatal => colorize("[FATAL]", .Red, &.{.Bold}),
+        .ok => SGR.parseString("<f:green><b>[OK]<r><r>"),
+        .fatal => SGR.parseString("<f:red><b>[FATAL]<r><r>"),
         else => level_string,
     };
 
