@@ -2,7 +2,7 @@ const std = @import("std");
 const log = @import("util/logging.zig");
 const SGR = @import("tasai").SGR;
 
-pub const std_options = .{
+pub const std_options = std.Options{
     .logFn = log.logMessage,
 };
 
@@ -39,7 +39,7 @@ fn ask(comptime question: []const u8, abort_on_refuse: bool) bool {
     };
 
     if (answer) |response| {
-        if (response[0] == 'y') {
+        if (response.len > 0 and response[0] == 'y') {
             log.ok("Continuing...", .{});
         } else {
             if (abort_on_refuse) {

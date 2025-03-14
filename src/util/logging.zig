@@ -18,7 +18,7 @@ pub fn fatal(comptime format: []const u8, args: anytype, comptime exit_code: ?u8
 
 pub fn logMessage(
     comptime level: std.log.Level,
-    comptime scope: @Type(.EnumLiteral),
+    comptime scope: @Type(.enum_literal),
     comptime format: []const u8,
     args: anytype,
 ) void {

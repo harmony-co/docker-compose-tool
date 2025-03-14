@@ -1,5 +1,6 @@
 .{
-    .name = "docker-compose-tool",
+    .fingerprint = 0xa92737af12ba485c,
+    .name = .dct,
     .version = "0.0.0",
     .dependencies = .{
         .tasai = .{
