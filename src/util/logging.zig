@@ -1,5 +1,5 @@
 const std = @import("std");
-const SGR = @import("tasai").SGR;
+const SGR = @import("tasai").CSI.SGR;
 
 pub const ok = std.log.scoped(.ok).info;
 pub const info = std.log.info;
@@ -7,7 +7,7 @@ pub const warn = std.log.warn;
 pub const debug = std.log.debug;
 pub const err = std.log.err;
 
-pub fn fatal(comptime format: []const u8, args: anytype, comptime exit_code: ?u8) void {
+pub fn fatal(comptime format: []const u8, args: anytype, comptime exit_code: ?u8) noreturn {
     std.log.scoped(.fatal).err(format, args);
     if (comptime exit_code) |code| {
         std.process.exit(code);

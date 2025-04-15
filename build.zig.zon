@@ -4,8 +4,8 @@
     .version = "0.0.0",
     .dependencies = .{
         .tasai = .{
-            .url = "git+https://github.com/Didas-git/tasai-zig#d02540de5b9909cb0a47e9aa933fb91ebcca4577",
-            .hash = "tasai-0.2.0-AAAAAM6WAAD1_y02jnHLaB6tfdHUcWEMsTraJcc6iFHj",
+            .url = "git+https://github.com/Didas-git/tasai-zig#def2f1479b28a27bcbc2f8faca88030e4d78e2a8",
+            .hash = "tasai-0.3.0-rb8ym0RaAQBtKbITGG72lHfn50eFc2zSjoi3IxSGgDUU",
         },
     },
     .paths = .{

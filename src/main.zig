@@ -1,6 +1,8 @@
 const std = @import("std");
+const shell = @import("util/shell.zig");
+const SGR = @import("tasai").CSI.SGR;
 const log = @import("util/logging.zig");
-const SGR = @import("tasai").SGR;
+const dct = @import("dct_funcs.zig");
 
 pub const std_options = std.Options{
     .logFn = log.logMessage,
@@ -54,23 +56,6 @@ fn ask(comptime question: []const u8, abort_on_refuse: bool) bool {
     return false;
 }
 
-fn getCwd(allocator: std.mem.Allocator) []u8 {
-    return std.fs.cwd().realpathAlloc(allocator, ".") catch |e| {
-        log.fatal("Failed to get current working directory: {!}", .{e}, null);
-        unreachable;
-    };
-}
-
-fn exec(command: []const []const u8) std.process.Child.RunError!std.process.Child.RunResult {
-    return std.process.Child.run(.{
-        .allocator = std.heap.page_allocator,
-        .argv = command,
-    }) catch |e| {
-        log.err("Failed to execute command: {!}", .{e});
-        return e;
-    };
-}
-
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
@@ -78,17 +63,20 @@ pub fn main() !void {
     defer std.process.argsFree(std.heap.page_allocator, args);
 
     const allocator = arena.allocator();
-    log.ok("Current working directory: {s}", .{getCwd(allocator)});
+    log.ok("Current working directory: {s}", .{shell.getCwd(allocator)});
+
+    const command = try dct.verifyCompose(allocator, try std.process.argsAlloc(allocator), "test");
+    log.debug("{s}", .{command});
 
     log.ok("Args: {d}", .{args.len});
 
     _ = ask("Do you want to continue?", true);
 
-    const out = try exec(args[1..]);
+    const out = try shell.exec(args[1..]);
     log.ok("Child process exited with out: {s}", .{out.stdout});
 
     const args2 = .{ "echo", "Hello, World!" };
-    const out2 = try exec(&args2);
+    const out2 = try shell.exec(&args2);
     log.ok("Child process exited with out: {s}", .{out2.stdout});
 
     log.debug("This is a debug message.", .{});
