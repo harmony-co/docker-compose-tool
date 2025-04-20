@@ -1,6 +1,8 @@
 const std = @import("std");
 const prompt = @import("tasai").prompt;
+const shell = @import("util/shell.zig");
 const fatal = @import("util/logging.zig").fatal;
+const ask = @import("util/logging.zig").ask;
 
 const Select = prompt.Select;
 
@@ -80,4 +82,18 @@ pub fn verifyCompose(allocator: std.mem.Allocator, arguments: [][:0]u8, project_
     );
 
     return docker_command;
+}
+
+pub fn up(allocator: std.mem.Allocator, docker_command: []const u8) !void {
+    _ = try shell.exec(&.{ "sh", "-c", try std.fmt.allocPrintZ(allocator, "{s} up -d --force-recreate --remove-orphans", .{docker_command}) });
+}
+
+pub fn down(allocator: std.mem.Allocator, docker_command: []const u8) !void {
+    _ = try shell.exec(&.{ "sh", "-c", try std.fmt.allocPrintZ(allocator, "{s} down", .{docker_command}) });
+}
+
+pub fn rebuild(allocator: std.mem.Allocator, docker_command: []const u8) !void {
+    try down(allocator, docker_command);
+    _ = try shell.exec(&.{ "sh", "-c", try std.fmt.allocPrintZ(allocator, "{s} pull", .{docker_command}) });
+    _ = try shell.exec(&.{ "sh", "-c", try std.fmt.allocPrintZ(allocator, "{s} up -d --force-recreate --remove-orphans --build", .{docker_command}) });
 }

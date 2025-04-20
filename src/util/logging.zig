@@ -43,3 +43,51 @@ pub fn logMessage(
     const writer = io.writer();
     nosuspend writer.print(prefix ++ " " ++ format ++ "\n", args) catch return;
 }
+
+pub fn ask(comptime question: []const u8, abort_on_refuse: bool) bool {
+    if (question.len == 0) {
+        @compileError("You need to provide a question to ask");
+    }
+
+    const std_out = std.io.getStdOut();
+    const reader_interface = std.io.getStdIn().reader();
+    var answer_buffer: [4096]u8 = undefined;
+
+    std_out.lock(.none) catch |e| {
+        fatal("{!}", .{e}, null);
+        return false;
+    };
+    defer std_out.unlock();
+
+    const writer = std_out.writer();
+
+    writer.print(SGR.parseString("<f:yellow><b>{s}\n<r><r>"), .{question}) catch |e| {
+        fatal("{!}", .{e}, null);
+        return false;
+    };
+
+    writer.print("Continue? [y/N] ", .{}) catch |e| {
+        fatal("{!}", .{e}, null);
+        return false;
+    };
+
+    const answer = reader_interface.readUntilDelimiterOrEof(&answer_buffer, '\n') catch |e| {
+        fatal("{!}", .{e}, null);
+        return false;
+    };
+
+    if (answer) |response| {
+        if (response.len > 0 and response[0] == 'y') {
+            ok("Continuing...", .{});
+        } else {
+            if (abort_on_refuse) {
+                fatal("Aborting...", .{}, null);
+            } else {
+                warn("Continuing...", .{});
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
